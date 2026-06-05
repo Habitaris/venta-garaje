@@ -267,7 +267,31 @@ $("#slides").addEventListener("scroll",()=>{const sl=$("#slides");
     $("#dots").querySelectorAll("i").forEach((d,j)=>d.className=j===k?"on":"");}});
 document.addEventListener("keydown",e=>{if(!current)return;
   if(e.key==="Escape")closeDetail(); if(e.key==="ArrowLeft")goSlide(-1); if(e.key==="ArrowRight")goSlide(1);});
-render();
+
+/* ── Conexión con Supabase: estado + precio + textos en vivo ───────────────
+   Las fotos siguen incrustadas en este archivo. Si la conexión falla por
+   cualquier motivo, la página se muestra igual con los datos locales. */
+async function vgBootstrap(){
+  const SB_URL="https://zqigzzxsadhejvvxckfd.supabase.co/rest/v1/venta_garaje?select=id,estado,price,name,cat,dims,brand,note";
+  const SB_KEY="sb_publishable_56379RNJSkJhfpI0X6474Q_s3IGkagi";
+  try{
+    const resp=await fetch(SB_URL,{headers:{apikey:SB_KEY,Authorization:"Bearer "+SB_KEY}});
+    if(!resp.ok) throw new Error("HTTP "+resp.status);
+    const rows=await resp.json();
+    const byId={}; rows.forEach(r=>{byId[r.id]=r;});
+    DATA.items.forEach(it=>{
+      const r=byId[it.id]; if(!r) return;
+      if(r.estado!=null) estados[it.id]=r.estado;
+      if(r.price!=null) it.price=r.price;
+      ["name","cat","dims","brand","note"].forEach(f=>{ if(r[f]!=null) it[f]=r[f]; });
+    });
+  }catch(err){
+    console.warn("Catálogo: sin conexión a Supabase, se usan datos locales.",err);
+  }finally{
+    render();
+  }
+}
+vgBootstrap();
 </script>
 </body>
 </html>
