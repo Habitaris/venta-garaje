@@ -222,6 +222,36 @@ header h1 em{font-style:italic;color:#D98E5A;font-weight:360}
 .dots{padding-top:18px}
 .dinfo{padding-top:22px}
 .dname{margin-top:6px}
+
+/* --- detalle revista (dos paginas) --- */
+.detail{background:#EFE9DD;color:#2A231C}
+.dtop{position:absolute;top:0;right:0;background:transparent;padding:16px;z-index:6}
+.close{background:rgba(35,25,15,.45);backdrop-filter:blur(6px);color:#F4ECE0;width:42px;height:42px;box-shadow:none}
+.gallery{max-width:none;margin:0;padding:0;background:#211B16;position:relative}
+.slide{height:46vh;background:#211B16;border-radius:0;overflow:hidden;box-shadow:none}
+.slide img{object-fit:contain;padding:18px}
+.arrow{background:rgba(244,236,224,.16);backdrop-filter:blur(6px);color:#F4ECE0;box-shadow:none}
+.dots{padding-top:0;position:absolute;bottom:14px;left:0;right:0;z-index:3}
+.dots i{background:rgba(244,236,224,.3)}
+.dots i.on{background:#D98E5A}
+.dinfo{max-width:620px;margin:0 auto;padding:26px 22px calc(120px + var(--safe-b))}
+.dcat{color:#A6573B;letter-spacing:.2em}
+.dname{color:#2A231C;margin-top:6px}
+.dprice{color:#B0593C}
+.dbadge{background:#fff;color:#6F665A;box-shadow:0 2px 8px rgba(0,0,0,.06)}
+.dfacts{flex-direction:column;gap:0;margin-top:18px}
+.fact{background:transparent;border:none;border-top:1px solid #D9D1C2;border-radius:0;padding:11px 2px;color:#6F665A;width:100%;font-size:.92rem}
+@media(min-width:880px){
+.detail.on{display:grid;grid-template-columns:56% 44%;grid-template-rows:1fr auto;grid-template-areas:"img info" "img cta";overflow:hidden}
+.gallery{grid-area:img;height:100vh}
+.slide{height:100vh}
+.slide img{padding:7vh 5vw}
+.dots{width:56%}
+.dinfo{grid-area:info;overflow-y:auto;max-height:100vh;max-width:none;margin:0;padding:11vh 7% 30px;align-self:stretch}
+.dname{font-size:clamp(2.2rem,3.2vw,3rem)}
+.dwrap{grid-area:cta;position:static;background:#fff;border-top:1px solid #E2DACB;padding:18px 7%}
+.dwrap-in{max-width:none;margin:0}
+}
 </style>
 </head>
 <body>
