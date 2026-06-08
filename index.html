@@ -164,6 +164,51 @@ footer a{color:var(--clay);font-weight:600;text-decoration:none}
 .detail .dinfo{padding-top:16px}
 .dname{font-size:1.95rem}
 .dprice{font-weight:600}
+
+/* ===== REDISENO lookbook ===== */
+html{scroll-behavior:smooth}
+header{background:#23190F;color:#F2E9DC;position:relative;overflow:hidden}
+header::before{content:"";position:absolute;inset:0;pointer-events:none;opacity:.06;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")}
+header .wrap{position:relative;z-index:2}
+.hero-grid{min-height:clamp(360px,60vh,560px);align-items:stretch}
+.hero-copy{padding:54px 0 50px}
+.kicker{color:#D98E5A;letter-spacing:.34em;text-transform:uppercase;font-size:.7rem;font-weight:600;margin:0 0 22px}
+header h1{font-family:'Fraunces',serif;font-optical-sizing:auto;font-weight:340;font-size:clamp(3.2rem,9vw,6.6rem);line-height:.92;letter-spacing:-.02em;margin:0;color:#F4ECE0}
+header h1 em{font-style:italic;color:#D98E5A;font-weight:360}
+.lede{color:#C9BBA8;max-width:30rem;margin:26px 0 0;font-size:1.02rem;line-height:1.55}
+.meta{margin-top:30px;display:flex;flex-direction:column;gap:6px;color:#A99B86;font-size:.86rem}
+.meta b{color:#E7D8C4;font-weight:600}
+.hero-photo{clip-path:none;border:none;min-height:100%;filter:saturate(.97) brightness(.95)}
+.hero-photo::after{content:"";position:absolute;inset:0;background:linear-gradient(100deg,#23190F 2%,rgba(35,25,15,.25) 38%,transparent 72%)}
+.bar{background:rgba(239,233,221,.88);backdrop-filter:blur(12px);border-bottom:1px solid #DAD0BE}
+.count{font-family:'Fraunces',serif;font-style:italic;font-size:1.05rem;color:#3A322A}
+.admin-toggle{margin-left:auto;border:1px solid #CBBFAC;background:transparent;color:#8A7C68;border-radius:999px;padding:6px 14px;font-size:.78rem;letter-spacing:.04em;cursor:pointer}
+.chip{border:none;background:transparent;color:#8A7C68;padding:7px 3px;border-radius:0;font-size:.92rem;border-bottom:2px solid transparent}
+.chip.on{background:transparent;color:#23190F;border-bottom:2px solid #B0593C}
+.grid{gap:32px 26px;grid-template-columns:repeat(auto-fill,minmax(228px,1fr));padding:40px 0 90px}
+.card{background:transparent;border:none;border-radius:0;box-shadow:none;overflow:visible;opacity:0;transform:translateY(16px);animation:rise .7s cubic-bezier(.2,.7,.2,1) forwards}
+.card:hover{transform:translateY(-5px);box-shadow:none}
+@keyframes rise{to{opacity:1;transform:translateY(0)}}
+.card:nth-child(1){animation-delay:.02s}.card:nth-child(2){animation-delay:.07s}.card:nth-child(3){animation-delay:.12s}.card:nth-child(4){animation-delay:.17s}.card:nth-child(5){animation-delay:.22s}.card:nth-child(6){animation-delay:.27s}.card:nth-child(n+7){animation-delay:.3s}
+.ph{aspect-ratio:4/5;border-radius:3px;overflow:hidden;background:#E3DACB;box-shadow:0 1px 2px rgba(35,25,15,.06)}
+.ph img{object-fit:cover;transition:transform .9s cubic-bezier(.2,.7,.2,1)}
+.card:hover .ph img{transform:scale(1.06)}
+.cbody{padding:15px 2px 0;gap:3px}
+.ccat{color:#A6573B;letter-spacing:.24em;font-size:.57rem}
+.cref{align-self:flex-start;background:transparent;border:none;padding:0;color:#A99B86;letter-spacing:.16em;font-size:.57rem;margin-bottom:1px;opacity:.85}
+.cname{font-family:'Fraunces',serif;font-weight:380;font-size:1.24rem;line-height:1.12;color:#2A231C;margin:2px 0 0}
+.cprice{font-family:'Fraunces',serif;font-style:italic;font-weight:400;font-size:1.12rem;color:#B0593C}
+.cfrom{font-style:italic;color:#A6573B;font-weight:500;font-size:.72rem}
+.badge{top:10px;left:10px;background:rgba(244,236,224,.9);backdrop-filter:blur(4px);box-shadow:none;border:none;color:#6F665A;font-weight:600;font-size:.55rem;letter-spacing:.16em;padding:5px 9px;border-radius:2px}
+.b-vend{color:#A6483A}.b-apar{color:#9C7321}.b-disp{color:#5E7355}
+.card.vendido .ph img{filter:grayscale(.5) brightness(.92)}
+.stamp span{border:1.5px solid #A6483A;color:#A6483A;background:rgba(244,236,224,.72);font-weight:500;font-size:1rem;letter-spacing:.22em;padding:6px 16px;transform:rotate(-8deg);border-radius:2px}
+.detail{background:#EFE9DD}
+.dname{font-family:'Fraunces',serif;font-weight:360;font-size:clamp(1.9rem,5vw,2.5rem);line-height:1.05;color:#2A231C}
+.dcat{color:#A6573B;letter-spacing:.2em}
+.dprice{font-family:'Fraunces',serif;font-style:italic;color:#B0593C;font-weight:400}
+.fromline{color:#A6573B}
+@media(prefers-reduced-motion:reduce){.card{animation:none;opacity:1;transform:none}.ph img{transition:none}}
 </style>
 </head>
 <body>
