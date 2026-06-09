@@ -7,7 +7,7 @@
 *{box-sizing:border-box}
 body{margin:0;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:var(--bg);color:var(--ink);font-size:15px}
 header{position:sticky;top:0;background:var(--bg);border-bottom:1px solid var(--line);padding:10px 14px;display:flex;align-items:center;gap:8px;flex-wrap:wrap;z-index:5}
-.tabs{display:flex;gap:6px;flex:1;min-width:160px}
+.tabs{display:flex;gap:6px;flex:1;min-width:150px}
 button{font:inherit;cursor:pointer;border:1px solid var(--line);background:var(--card);border-radius:8px;padding:7px 11px;color:var(--ink)}
 button.pri{background:var(--accent);color:#fff;border-color:var(--accent)}
 button.gho{background:transparent}
@@ -49,12 +49,16 @@ small.h{color:var(--mut);font-size:12px}
 .btot tr.big td{font-size:16px;font-weight:700;border-bottom:none;padding-top:12px}
 .btot tr.cobrar td{color:var(--bad)}
 .acct{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px;margin:10px 0}
-.acct .nm{font-weight:600}
-.acct .meta{font-size:12px;color:var(--mut)}
+.acct .nm{font-weight:700;font-size:16px}
+.acct .meta{font-size:13px;color:var(--mut);margin-top:2px}
 .acct .ctl{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:8px}
 .acct input[type=text]{flex:1;min-width:150px}
-label.ck{display:flex;align-items:center;gap:6px;font-size:14px;color:var(--ink);margin:0}
-label.ck input{width:auto}
+.prow{display:flex;align-items:center;gap:8px;padding:7px 0;border-top:1px solid var(--line);margin-top:6px}
+.prow .pname{flex:1}
+.prow .pname.pd{text-decoration:line-through;color:var(--mut)}
+.prow .pamt{color:var(--mut);font-size:13px;white-space:nowrap}
+.prow input[type=checkbox]{width:20px;height:20px}
+.xdel{border:none;background:transparent;color:var(--bad);font-size:15px;padding:2px 6px;cursor:pointer}
 h3.sec{margin:18px 0 4px;font-size:15px}
 </style></head>
 <body>
@@ -70,11 +74,12 @@ h3.sec{margin:18px 0 4px;font-size:15px}
   <header>
     <div class="tabs"><button id="tabInv" class="tab active" onclick="showTab('inv')">Inventario</button><button id="tabBal" class="tab" onclick="showTab('bal')">Balance</button></div>
     <button class="pri" onclick="openEdit(null)">+ Nuevo</button>
-    <button class="gho" onclick="load()">Recargar</button>
+    <button class="gho" onclick="load()">↻</button>
+    <button class="gho" onclick="logout()">Salir</button>
   </header>
   <div class="wrap">
     <div id="viewInv">
-      <div class="hint">Toca <b>+ Nuevo</b> (arriba) para agregar un artículo. En cada artículo tienes: <b>Apagar/Encender</b> (sacarlo o mostrarlo en el catálogo público), <b>Fotos</b> (subir varias), <b>Editar</b> y <b>Borrar</b>.</div>
+      <div class="hint">Toca <b>+ Nuevo</b> para agregar un artículo. En cada uno: <b>Apagar/Encender</b> (sacarlo o mostrarlo en el catálogo), <b>Fotos</b>, <b>Editar</b>, <b>Borrar</b>.</div>
       <div id="list"></div>
     </div>
     <div id="viewBal" style="display:none"></div>
@@ -104,7 +109,7 @@ h3.sec{margin:18px 0 4px;font-size:15px}
   <h2 style="margin:0 0 6px">Fotos · <span id="pTitle"></span></h2>
   <div id="pMsg"></div>
   <input id="pFile" type="file" accept="image/*" multiple>
-  <div style="height:4px"></div><small class="h">Se comprimen solas. La primera es la portada (botón "portada" para ponerla de primera).</small>
+  <div style="height:4px"></div><small class="h">Se comprimen solas. La primera es la portada (botón "portada").</small>
   <div id="pList" class="ph"></div>
   <div class="row" style="margin-top:14px">
     <button class="pri" onclick="savePhotos()">Guardar fotos</button>
@@ -117,19 +122,21 @@ const KEY="sb_publishable_56379RNJSkJhfpI0X6474Q_s3IGkagi";
 const CATS=["Alcoba","Comedor","Deporte","Electrodomésticos","Espejos","Movilidad","Oficina","Sala"];
 const PFX={"Alcoba":"ALC","Comedor":"COM","Deporte":"DEP","Electrodomésticos":"ELE","Espejos":"ESP","Movilidad":"MOV","Oficina":"OFI","Sala":"SAL"};
 let PIN="",ITEMS=[],SALES={},TAB="inv",curId=null,curPhotos=[];
+try{TAB=localStorage.getItem('vg_tab')||'inv'}catch(e){}
 const H=()=>({apikey:KEY,Authorization:"Bearer "+KEY,"Content-Type":"application/json"});
 async function rpc(fn,args){const r=await fetch(SUPA+"/rest/v1/rpc/"+fn,{method:"POST",headers:H(),body:JSON.stringify(args)});const t=await r.text();try{return JSON.parse(t)}catch(e){return t}}
 function msg(el,txt,ok){el.innerHTML='<div class="msg '+(ok?'ok':'err')+'">'+txt+'</div>';if(ok)setTimeout(()=>{el.innerHTML=''},2500)}
 function esc(s){return (s==null?'':String(s)).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;')}
 function fmt(n){return '$'+Number(n||0).toLocaleString('es-CO')}
-async function login(){PIN=document.getElementById('pin').value.trim();const res=await rpc('vg_sales',{p_pin:PIN});if(res==='bad_pin'||(res&&res.message)){msg(document.getElementById('gmsg'),'PIN incorrecto',false);return}document.getElementById('gate').style.display='none';document.getElementById('app').style.display='block';load()}
+async function login(){PIN=document.getElementById('pin').value.trim();const res=await rpc('vg_sales',{p_pin:PIN});if(res==='bad_pin'||(res&&res.message)){try{localStorage.removeItem('vg_pin')}catch(e){}msg(document.getElementById('gmsg'),'PIN incorrecto',false);return}try{localStorage.setItem('vg_pin',PIN)}catch(e){}document.getElementById('gate').style.display='none';document.getElementById('app').style.display='block';load()}
+function logout(){try{localStorage.removeItem('vg_pin')}catch(e){}location.reload()}
 async function load(){
   const url=SUPA+"/rest/v1/venta_garaje?select=id,estado,price,name,cat,dims,brand,note,ref,avail_from,visible,imgs&order=cat.asc,ref.asc";
   const r=await fetch(url,{headers:{apikey:KEY,Authorization:"Bearer "+KEY},cache:"no-store"});ITEMS=await r.json();
   const s=await rpc('vg_sales',{p_pin:PIN});SALES={};if(Array.isArray(s))s.forEach(function(x){SALES[x.id]=x});
   renderAll();
 }
-function showTab(t){TAB=t;renderAll()}
+function showTab(t){TAB=t;try{localStorage.setItem('vg_tab',t)}catch(e){}renderAll()}
 function updateTabs(){document.getElementById('tabInv').classList.toggle('active',TAB!=='bal');document.getElementById('tabBal').classList.toggle('active',TAB==='bal')}
 function renderAll(){updateTabs();if(TAB==='bal'){document.getElementById('viewInv').style.display='none';document.getElementById('viewBal').style.display='block';renderBalance()}else{document.getElementById('viewBal').style.display='none';document.getElementById('viewInv').style.display='block';render()}}
 function render(){const L=document.getElementById('list');L.innerHTML='';let cat=null;ITEMS.forEach(it=>{if(it.cat!==cat){cat=it.cat;const h=document.createElement('div');h.className='catH';h.textContent=cat||'(sin categoría)';L.appendChild(h)}const d=document.createElement('div');d.className='item'+(it.visible===false?' hidden':'');const cover=(it.imgs&&it.imgs[0])||'';const est=it.estado||'disp';const n=(it.imgs||[]).length;d.innerHTML=(cover?'<img class="thumb" src="'+cover+'">':'<div class="thumb"></div>')+'<div class="body"><div class="nm">'+esc(it.name||'(sin nombre)')+(it.visible===false?' · oculto':'')+'</div><div class="meta">'+esc(it.ref||'')+' · '+fmt(it.price)+'</div><div class="row">'+'<button class="pill'+(est==='disp'?' on-disp':'')+'" data-act="est" data-id="'+it.id+'" data-code="disp">Disponible</button>'+'<button class="pill'+(est==='apar'?' on-apar':'')+'" data-act="est" data-id="'+it.id+'" data-code="apar">Apartado</button>'+'<button class="pill'+(est==='vend'?' on-vend':'')+'" data-act="est" data-id="'+it.id+'" data-code="vend">Vendido</button>'+'</div><div class="row">'+'<button class="gho" data-act="vis" data-id="'+it.id+'">'+(it.visible===false?'Encender':'Apagar')+'</button>'+'<button class="gho" data-act="ph" data-id="'+it.id+'">Fotos ('+n+')</button>'+'<button class="gho" data-act="ed" data-id="'+it.id+'">Editar</button>'+'<button class="gho" data-act="del" data-id="'+it.id+'" style="color:var(--bad)">Borrar</button>'+'</div></div>';L.appendChild(d)})}
@@ -142,28 +149,36 @@ function renderBalance(){
   ITEMS.forEach(function(it){var p=Number(it.price)||0;totalAll+=p;if(it.estado==='disp'){dispT+=p;nDisp++}if(it.estado==='apar'||it.estado==='vend'){soldT+=p;nSold++;var s=SALES[it.id];if(s&&s.paid)paidT+=p}});
   var pend=soldT-paidT;
   var html='<div class="btot"><table>'+
-    '<tr><td>Pendiente de vender ('+nDisp+')</td><td>'+fmt(dispT)+'</td></tr>'+
-    '<tr><td>Vendido / apartado ('+nSold+')</td><td>'+fmt(soldT)+'</td></tr>'+
-    '<tr><td>Pagado</td><td>'+fmt(paidT)+'</td></tr>'+
     '<tr class="cobrar"><td>Pendiente por cobrar</td><td>'+fmt(pend)+'</td></tr>'+
+    '<tr><td>Pagado</td><td>'+fmt(paidT)+'</td></tr>'+
+    '<tr><td>Vendido / apartado ('+nSold+')</td><td>'+fmt(soldT)+'</td></tr>'+
+    '<tr><td>Pendiente de vender ('+nDisp+')</td><td>'+fmt(dispT)+'</td></tr>'+
     '<tr class="big"><td>Valor total inventario</td><td>'+fmt(totalAll)+'</td></tr>'+
     '</table></div>';
-  var accts=ITEMS.filter(function(it){return it.estado==='apar'||it.estado==='vend'||SALES[it.id]});
-  html+='<h3 class="sec">Cuentas ('+accts.length+')</h3>';
-  if(!accts.length)html+='<div class="hint">Aún no hay artículos vendidos o apartados. Marca un artículo como Vendido/Apartado en Inventario y aquí podrás registrar el comprador y el pago.</div>';
-  accts.forEach(function(it){var s=SALES[it.id]||{};var estLbl=it.estado==='vend'?'Vendido':(it.estado==='apar'?'Apartado':'Disponible');
-    html+='<div class="acct"><div class="nm">'+esc(it.name)+' · '+fmt(it.price)+'</div>'+
-      '<div class="meta">'+esc(it.ref||'')+' · '+estLbl+'</div>'+
-      '<div class="ctl"><input type="text" id="b_'+it.id+'" placeholder="Nombre del comprador" value="'+esc(s.buyer||'')+'">'+
-      '<label class="ck"><input type="checkbox" id="p_'+it.id+'" '+(s.paid?'checked':'')+'> Pagado</label></div>'+
-      '<div class="ctl"><button class="pri" data-act="savesale" data-id="'+it.id+'">Guardar</button>'+
-      '<button class="gho" style="color:var(--bad)" data-act="delsale" data-id="'+it.id+'">Eliminar cuenta</button></div></div>';
+  var sold=ITEMS.filter(function(it){return it.estado==='apar'||it.estado==='vend'||SALES[it.id]});
+  var groups={},noBuyer=[];
+  sold.forEach(function(it){var s=SALES[it.id];var b=(s&&s.buyer)?s.buyer:null;if(b){(groups[b]=groups[b]||[]).push(it)}else{noBuyer.push(it)}});
+  var buyers=Object.keys(groups).sort();
+  html+='<h3 class="sec">Cuentas por persona</h3>';
+  if(!buyers.length&&!noBuyer.length)html+='<div class="hint">Aún no hay ventas. Marca un artículo como Vendido en Inventario y aquí registras el comprador.</div>';
+  buyers.forEach(function(b){var items=groups[b];var bt=0,bp=0;items.forEach(function(it){var p=Number(it.price)||0;bt+=p;var s=SALES[it.id];if(s&&s.paid)bp+=p});var bpend=bt-bp;
+    html+='<div class="acct"><div class="nm">'+esc(b)+'</div>'+
+      '<div class="meta">Total '+fmt(bt)+' · Pagado '+fmt(bp)+' · <b style="color:'+(bpend>0?'var(--bad)':'var(--ok)')+'">Debe '+fmt(bpend)+'</b></div>';
+    items.forEach(function(it){var s=SALES[it.id]||{};
+      html+='<div class="prow"><input type="checkbox" data-act="paid" data-id="'+it.id+'" data-buyer="'+esc(b)+'" '+(s.paid?'checked':'')+'>'+
+        '<span class="pname'+(s.paid?' pd':'')+'">'+esc(it.name)+'</span><span class="pamt">'+fmt(it.price)+'</span>'+
+        '<button class="xdel" data-act="delsale" data-id="'+it.id+'" title="Eliminar cuenta">✕</button></div>';
+    });
+    html+='</div>';
   });
+  if(noBuyer.length){html+='<h3 class="sec">Sin comprador asignado</h3>';
+    noBuyer.forEach(function(it){html+='<div class="acct"><div class="nm">'+esc(it.name)+' · '+fmt(it.price)+'</div><div class="meta">'+esc(it.ref||'')+'</div>'+
+      '<div class="ctl"><input type="text" data-act="setbuyer" data-id="'+it.id+'" placeholder="Escribe el comprador y Enter"></div></div>';});
+  }
   document.getElementById('viewBal').innerHTML=html;
 }
-document.getElementById('viewBal').addEventListener('click',function(e){var b=e.target.closest('button[data-act]');if(!b)return;var id=b.dataset.id;if(b.dataset.act==='savesale')saveSale(id);else if(b.dataset.act==='delsale')delSale(id)});
-async function saveSale(id){var buyer=document.getElementById('b_'+id).value.trim();var paid=document.getElementById('p_'+id).checked;var res=await rpc('vg_setsale',{p_id:id,p_buyer:buyer,p_paid:paid,p_pin:PIN});if(res==='ok'){await load()}else alert('Error: '+res)}
-async function delSale(id){if(!confirm('¿Eliminar la cuenta? El artículo volverá a Disponible.'))return;var res=await rpc('vg_delsale',{p_id:id,p_pin:PIN});if(res==='ok'){await load()}else alert('Error: '+res)}
+document.getElementById('viewBal').addEventListener('change',async function(e){var el=e.target;if(el.dataset.act==='paid'){await rpc('vg_setsale',{p_id:el.dataset.id,p_buyer:el.dataset.buyer,p_paid:el.checked,p_pin:PIN});await load()}else if(el.dataset.act==='setbuyer'){var b=el.value.trim();if(b){await rpc('vg_setsale',{p_id:el.dataset.id,p_buyer:b,p_paid:false,p_pin:PIN});await load()}}});
+document.getElementById('viewBal').addEventListener('click',async function(e){var b=e.target.closest('button[data-act="delsale"]');if(!b)return;if(!confirm('¿Eliminar la cuenta? El artículo volverá a Disponible.'))return;await rpc('vg_delsale',{p_id:b.dataset.id,p_pin:PIN});await load()});
 function openEdit(id){const sel=document.getElementById('eCat');sel.innerHTML=CATS.map(c=>'<option>'+c+'</option>').join('');curId=id;const it=id?ITEMS.find(x=>x.id===id):null;document.getElementById('eTitle').textContent=id?'Editar artículo':'Nuevo artículo';document.getElementById('eName').value=it?(it.name||''):'';document.getElementById('ePrice').value=it?(it.price||''):'';document.getElementById('eCat').value=it?(it.cat||'Sala'):'Sala';document.getElementById('eRef').value=it?(it.ref||''):'';document.getElementById('eBrand').value=it?(it.brand||''):'';document.getElementById('eDims').value=it?(it.dims||''):'';document.getElementById('eNote').value=it?(it.note||''):'';document.getElementById('eMsg').innerHTML='';openM('mEdit')}
 function nextRef(cat){const p=PFX[cat]||'XXX';let mx=0;ITEMS.forEach(it=>{if(it.ref&&it.ref.indexOf(p+'-')===0){const num=parseInt(it.ref.slice(p.length+1));if(!isNaN(num))mx=Math.max(mx,num)}});return p+'-'+String(mx+1).padStart(2,'0')}
 function slug(s){return ((s||'item').toLowerCase().normalize('NFD').replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'').slice(0,28))||'item'}
@@ -176,5 +191,6 @@ document.getElementById('pFile').addEventListener('change',async e=>{const fs=[.
 async function savePhotos(){const res=await rpc('vg_setimgs',{p_id:curId,p_imgs:curPhotos,p_pin:PIN});if(res==='ok'){const it=ITEMS.find(x=>x.id===curId);if(it)it.imgs=curPhotos.slice();closeM('mPh');renderAll()}else{msg(document.getElementById('pMsg'),'Error: '+res,false)}}
 function openM(id){document.getElementById(id).classList.add('show')}
 function closeM(id){document.getElementById(id).classList.remove('show')}
+(function(){var p=null;try{p=localStorage.getItem('vg_pin')}catch(e){}if(p){document.getElementById('pin').value=p;login()}})();
 </script>
 </body></html>
