@@ -445,7 +445,7 @@ document.addEventListener("keydown",e=>{if(!current)return;
    Las fotos siguen incrustadas en este archivo. Si la conexión falla por
    cualquier motivo, la página se muestra igual con los datos locales. */
 async function vgBootstrap(){
-  const SB_URL="https://zqigzzxsadhejvvxckfd.supabase.co/rest/v1/venta_garaje?select=id,estado,price,name,cat,dims,brand,note,ref,avail_from";
+  const SB_URL="https://zqigzzxsadhejvvxckfd.supabase.co/rest/v1/venta_garaje?select=id,estado,price,name,cat,dims,brand,note,ref,avail_from,imgs";
   const SB_KEY="sb_publishable_56379RNJSkJhfpI0X6474Q_s3IGkagi";
   try{
     const resp=await fetch(SB_URL,{headers:{apikey:SB_KEY,Authorization:"Bearer "+SB_KEY}});
