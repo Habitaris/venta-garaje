@@ -1,0 +1,121 @@
+<!doctype html>
+<html lang="es"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Admin · Venta de garaje</title>
+<style>
+:root{--bg:#f4f2ec;--card:#fff;--ink:#222;--mut:#888;--line:#e3dfd5;--accent:#b08442;--ok:#2e7d32;--warn:#b26a00;--bad:#b00020}
+*{box-sizing:border-box}
+body{margin:0;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:var(--bg);color:var(--ink);font-size:15px}
+header{position:sticky;top:0;background:var(--bg);border-bottom:1px solid var(--line);padding:12px 16px;display:flex;align-items:center;gap:10px;z-index:5}
+header h1{font-size:17px;margin:0;font-weight:600;flex:1}
+button{font:inherit;cursor:pointer;border:1px solid var(--line);background:var(--card);border-radius:8px;padding:7px 11px;color:var(--ink)}
+button.pri{background:var(--accent);color:#fff;border-color:var(--accent)}
+button.gho{background:transparent}
+.wrap{max-width:760px;margin:0 auto;padding:14px}
+.gate{max-width:340px;margin:60px auto;text-align:center;padding:0 16px}
+input,select,textarea{font:inherit;width:100%;padding:9px 10px;border:1px solid var(--line);border-radius:8px;background:#fff;color:var(--ink)}
+label{display:block;font-size:12px;color:var(--mut);margin:8px 0 3px}
+.item{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px;margin:10px 0;display:flex;gap:12px}
+.thumb{width:64px;height:64px;border-radius:8px;object-fit:cover;background:#eee;flex:none}
+.item .body{flex:1;min-width:0}
+.item .nm{font-weight:600}
+.item .meta{font-size:12px;color:var(--mut)}
+.row{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px;align-items:center}
+.pill{font-size:12px;padding:4px 9px;border-radius:999px;border:1px solid var(--line);background:#fff}
+.pill.on-disp{background:#e8f5e9;border-color:#bfe0c2;color:var(--ok)}
+.pill.on-apar{background:#fff4e0;border-color:#f0dcb0;color:var(--warn)}
+.pill.on-vend{background:#fde7ea;border-color:#f3c2cb;color:var(--bad)}
+.catH{font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--mut);margin:18px 0 4px}
+.hidden{opacity:.5}
+.modal{position:fixed;inset:0;background:rgba(0,0,0,.45);display:none;align-items:flex-start;justify-content:center;padding:20px;overflow:auto;z-index:20}
+.modal.show{display:flex}
+.sheet{background:var(--card);border-radius:14px;max-width:560px;width:100%;padding:18px;margin:auto}
+.ph{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
+.ph .pc{position:relative;width:84px;height:84px}
+.ph img{width:84px;height:84px;object-fit:cover;border-radius:8px}
+.ph .x{position:absolute;top:-6px;right:-6px;background:#000;color:#fff;border:none;border-radius:50%;width:22px;height:22px;line-height:1;padding:0}
+.ph .ar{position:absolute;bottom:2px;left:2px;background:rgba(0,0,0,.6);color:#fff;border:none;border-radius:6px;font-size:11px;padding:2px 5px}
+.msg{padding:8px 12px;border-radius:8px;margin:8px 0;font-size:13px}
+.msg.ok{background:#e8f5e9;color:var(--ok)} .msg.err{background:#fde7ea;color:var(--bad)}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+small.h{color:var(--mut);font-size:12px}
+</style></head>
+<body>
+<div id="gate" class="gate">
+  <h1>Modo dueño</h1>
+  <label style="text-align:left">PIN</label>
+  <input id="pin" type="password" inputmode="numeric" placeholder="PIN">
+  <div style="height:10px"></div>
+  <button class="pri" style="width:100%" onclick="login()">Entrar</button>
+  <div id="gmsg"></div>
+</div>
+<div id="app" style="display:none">
+  <header>
+    <h1>Inventario</h1>
+    <button class="pri" onclick="openEdit(null)">+ Nuevo</button>
+    <button class="gho" onclick="load()">Recargar</button>
+  </header>
+  <div class="wrap"><div id="list"></div><div style="height:40px"></div></div>
+</div>
+<div id="mEdit" class="modal"><div class="sheet">
+  <h2 id="eTitle" style="margin:0 0 6px">Nuevo artículo</h2>
+  <div id="eMsg"></div>
+  <label>Nombre</label><input id="eName">
+  <div class="grid2">
+   <div><label>Precio (COP)</label><input id="ePrice" inputmode="numeric"></div>
+   <div><label>Categoría</label><select id="eCat"></select></div>
+  </div>
+  <div class="grid2">
+   <div><label>Referencia</label><input id="eRef" placeholder="auto"></div>
+   <div><label>Marca</label><input id="eBrand"></div>
+  </div>
+  <label>Medidas</label><input id="eDims">
+  <label>Nota</label><textarea id="eNote" rows="2"></textarea>
+  <div class="row" style="margin-top:14px">
+    <button class="pri" onclick="saveItem()">Guardar</button>
+    <button class="gho" onclick="closeM('mEdit')">Cancelar</button>
+  </div>
+</div></div>
+<div id="mPh" class="modal"><div class="sheet">
+  <h2 style="margin:0 0 6px">Fotos · <span id="pTitle"></span></h2>
+  <div id="pMsg"></div>
+  <input id="pFile" type="file" accept="image/*" multiple>
+  <div style="height:4px"></div><small class="h">Se comprimen solas. La primera es la portada (usa la flecha para subir una foto al primer lugar).</small>
+  <div id="pList" class="ph"></div>
+  <div class="row" style="margin-top:14px">
+    <button class="pri" onclick="savePhotos()">Guardar fotos</button>
+    <button class="gho" onclick="closeM('mPh')">Cerrar</button>
+  </div>
+</div></div>
+<script>
+const SUPA="https://zqigzzxsadhejvvxckfd.supabase.co";
+const KEY="sb_publishable_56379RNJSkJhfpI0X6474Q_s3IGkagi";
+const CATS=["Alcoba","Comedor","Deporte","Electrodomésticos","Espejos","Movilidad","Oficina","Sala"];
+const PFX={"Alcoba":"ALC","Comedor":"COM","Deporte":"DEP","Electrodomésticos":"ELE","Espejos":"ESP","Movilidad":"MOV","Oficina":"OFI","Sala":"SAL"};
+let PIN="",ITEMS=[],curId=null,curPhotos=[];
+const H=()=>({apikey:KEY,Authorization:"Bearer "+KEY,"Content-Type":"application/json"});
+async function rpc(fn,args){const r=await fetch(SUPA+"/rest/v1/rpc/"+fn,{method:"POST",headers:H(),body:JSON.stringify(args)});const t=await r.text();try{return JSON.parse(t)}catch(e){return t}}
+function msg(el,txt,ok){el.innerHTML='<div class="msg '+(ok?'ok':'err')+'">'+txt+'</div>';if(ok)setTimeout(()=>{el.innerHTML=''},2500)}
+async function login(){PIN=document.getElementById('pin').value.trim();const res=await rpc('vg_sales',{p_pin:PIN});if(res==='bad_pin'||(res&&res.message)){msg(document.getElementById('gmsg'),'PIN incorrecto',false);return}document.getElementById('gate').style.display='none';document.getElementById('app').style.display='block';load()}
+async function load(){const url=SUPA+"/rest/v1/venta_garaje?select=id,estado,price,name,cat,dims,brand,note,ref,avail_from,visible,imgs&order=cat.asc,ref.asc";const r=await fetch(url,{headers:{apikey:KEY,Authorization:"Bearer "+KEY},cache:"no-store"});ITEMS=await r.json();render()}
+function fmt(n){return n==null?'':'$'+Number(n).toLocaleString('es-CO')}
+function esc(s){return (s==null?'':String(s)).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}
+function render(){const L=document.getElementById('list');L.innerHTML='';let cat=null;ITEMS.forEach(it=>{if(it.cat!==cat){cat=it.cat;const h=document.createElement('div');h.className='catH';h.textContent=cat||'(sin categoría)';L.appendChild(h)}const d=document.createElement('div');d.className='item'+(it.visible===false?' hidden':'');const cover=(it.imgs&&it.imgs[0])||'';const est=it.estado||'disp';const n=(it.imgs||[]).length;d.innerHTML=(cover?'<img class="thumb" src="'+cover+'">':'<div class="thumb"></div>')+'<div class="body"><div class="nm">'+esc(it.name||'(sin nombre)')+(it.visible===false?' · oculto':'')+'</div><div class="meta">'+esc(it.ref||'')+' · '+fmt(it.price)+'</div><div class="row">'+'<button class="pill'+(est==='disp'?' on-disp':'')+'" data-act="est" data-id="'+it.id+'" data-code="disp">Disponible</button>'+'<button class="pill'+(est==='apar'?' on-apar':'')+'" data-act="est" data-id="'+it.id+'" data-code="apar">Apartado</button>'+'<button class="pill'+(est==='vend'?' on-vend':'')+'" data-act="est" data-id="'+it.id+'" data-code="vend">Vendido</button>'+'</div><div class="row">'+'<button class="gho" data-act="vis" data-id="'+it.id+'">'+(it.visible===false?'Encender':'Apagar')+'</button>'+'<button class="gho" data-act="ph" data-id="'+it.id+'">Fotos ('+n+')</button>'+'<button class="gho" data-act="ed" data-id="'+it.id+'">Editar</button>'+'<button class="gho" data-act="del" data-id="'+it.id+'" style="color:var(--bad)">Borrar</button>'+'</div></div>';L.appendChild(d)})}
+document.getElementById('list').addEventListener('click',e=>{const b=e.target.closest('button[data-act]');if(!b)return;const id=b.dataset.id,act=b.dataset.act;if(act==='est')setEstado(id,b.dataset.code);else if(act==='vis')toggleVis(id);else if(act==='ph')openPhotos(id);else if(act==='ed')openEdit(id);else if(act==='del')delItem(id)});
+async function setEstado(id,e){await rpc('vg_set',{p_id:id,p_estado:e,p_pin:PIN});const it=ITEMS.find(x=>x.id===id);if(it)it.estado=e;render()}
+async function toggleVis(id){const it=ITEMS.find(x=>x.id===id);const nv=(it.visible===false);await rpc('vg_setvisible',{p_id:id,p_visible:nv,p_pin:PIN});it.visible=nv;render()}
+async function delItem(id){if(!confirm('¿Borrar este artículo? No se puede deshacer.'))return;await rpc('vg_delete',{p_id:id,p_pin:PIN});ITEMS=ITEMS.filter(x=>x.id!==id);render()}
+function openEdit(id){const sel=document.getElementById('eCat');sel.innerHTML=CATS.map(c=>'<option>'+c+'</option>').join('');curId=id;const it=id?ITEMS.find(x=>x.id===id):null;document.getElementById('eTitle').textContent=id?'Editar artículo':'Nuevo artículo';document.getElementById('eName').value=it?(it.name||''):'';document.getElementById('ePrice').value=it?(it.price||''):'';document.getElementById('eCat').value=it?(it.cat||'Sala'):'Sala';document.getElementById('eRef').value=it?(it.ref||''):'';document.getElementById('eBrand').value=it?(it.brand||''):'';document.getElementById('eDims').value=it?(it.dims||''):'';document.getElementById('eNote').value=it?(it.note||''):'';document.getElementById('eMsg').innerHTML='';openM('mEdit')}
+function nextRef(cat){const p=PFX[cat]||'XXX';let mx=0;ITEMS.forEach(it=>{if(it.ref&&it.ref.indexOf(p+'-')===0){const num=parseInt(it.ref.slice(p.length+1));if(!isNaN(num))mx=Math.max(mx,num)}});return p+'-'+String(mx+1).padStart(2,'0')}
+function slug(s){return ((s||'item').toLowerCase().normalize('NFD').replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'').slice(0,28))||'item'}
+async function saveItem(){const name=document.getElementById('eName').value.trim();const price=parseInt(document.getElementById('ePrice').value.replace(/[^0-9]/g,''))||0;const cat=document.getElementById('eCat').value;let ref=document.getElementById('eRef').value.trim();const brand=document.getElementById('eBrand').value.trim();const dims=document.getElementById('eDims').value.trim();const note=document.getElementById('eNote').value.trim();if(!name){msg(document.getElementById('eMsg'),'Falta el nombre',false);return}if(!ref)ref=nextRef(cat);let res;if(curId){res=await rpc('vg_update',{p_id:curId,p_name:name,p_price:price,p_cat:cat,p_dims:dims,p_brand:brand,p_note:note,p_ref:ref,p_pin:PIN})}else{const id=slug(name)+'-'+Date.now().toString(36).slice(-4);res=await rpc('vg_create',{p_id:id,p_name:name,p_price:price,p_cat:cat,p_dims:dims,p_brand:brand,p_note:note,p_ref:ref,p_pin:PIN})}if(res==='ok'){closeM('mEdit');await load()}else{msg(document.getElementById('eMsg'),'Error: '+res,false)}}
+function openPhotos(id){curId=id;const it=ITEMS.find(x=>x.id===id);curPhotos=(it.imgs||[]).slice();document.getElementById('pTitle').textContent=it.name||'';document.getElementById('pMsg').innerHTML='';document.getElementById('pFile').value='';renderPh();openM('mPh')}
+function renderPh(){const c=document.getElementById('pList');c.innerHTML='';curPhotos.forEach((src,i)=>{const d=document.createElement('div');d.className='pc';d.innerHTML='<img src="'+src+'"><button class="x" data-i="'+i+'" data-a="rm">×</button>'+(i>0?'<button class="ar" data-i="'+i+'" data-a="up">portada</button>':'');c.appendChild(d)})}
+document.getElementById('pList').addEventListener('click',e=>{const b=e.target.closest('button[data-a]');if(!b)return;const i=+b.dataset.i;if(b.dataset.a==='rm'){curPhotos.splice(i,1)}else if(b.dataset.a==='up'){const t=curPhotos[i];curPhotos.splice(i,1);curPhotos.unshift(t)}renderPh()});
+function compress(file){return new Promise(res=>{const img=new Image();img.onload=()=>{const max=1280;let w=img.width,h=img.height;if(w>h&&w>max){h=Math.round(h*max/w);w=max}else if(h>=w&&h>max){w=Math.round(w*max/h);h=max}const cv=document.createElement('canvas');cv.width=w;cv.height=h;cv.getContext('2d').drawImage(img,0,0,w,h);res(cv.toDataURL('image/jpeg',0.62))};img.onerror=()=>res(null);img.src=URL.createObjectURL(file)})}
+document.getElementById('pFile').addEventListener('change',async e=>{const fs=[...e.target.files];if(!fs.length)return;msg(document.getElementById('pMsg'),'Procesando '+fs.length+' foto(s)…',true);for(const f of fs){const d=await compress(f);if(d)curPhotos.push(d)}renderPh();document.getElementById('pMsg').innerHTML='';e.target.value=''});
+async function savePhotos(){const res=await rpc('vg_setimgs',{p_id:curId,p_imgs:curPhotos,p_pin:PIN});if(res==='ok'){const it=ITEMS.find(x=>x.id===curId);if(it)it.imgs=curPhotos.slice();closeM('mPh');render()}else{msg(document.getElementById('pMsg'),'Error: '+res,false)}}
+function openM(id){document.getElementById(id).classList.add('show')}
+function closeM(id){document.getElementById(id).classList.remove('show')}
+</script>
+</body></html>
